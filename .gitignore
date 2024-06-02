@@ -1,0 +1,28 @@
+# File types
+*.xpr
+*.wpc
+*.wdf
+*.xml
+*.rst
+*.txt
+*.lpr
+*.js
+*.sh
+*.pb
+*.rpt
+*.rpx
+*.dcp
+*.tcl
+*.bat
+*.dcp
+*.log
+*.vdi
+*.jou
+*.vds
+*.editorconfig
+*.xci
+*.vho
+
+# Folders
+zyboPWM.runs/synth_1/__synthesis_is_complete__
+zyboPWM.runs/synth_1/.Xil/main_propImpl.xdc
