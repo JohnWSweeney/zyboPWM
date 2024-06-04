@@ -10,14 +10,30 @@ entity main is
 end main;
 
 architecture Behavioral of main is
+
+	component pwm_module
+    port
+     (
+      clk : in std_logic;
+      dutyCycle	: in integer range 0 to 255;
+	  pwm : out std_logic
+     );
+    end component;
+
 signal	clk         : std_logic;
 signal	led			: std_logic:= '0';
-signal	state		: integer range 0 to 255000:= 0;
-signal	period		: integer:= 255000;
+signal	timer		: integer range 0 to 125000000:= 0;
 signal	dutyCycle	: integer range 0 to 255:= 0;
 signal	dir			: std_logic:= '0';
 
 begin
+
+	PWMer : pwm_module
+    port map ( 
+			clk => clk,
+			dutyCycle => dutyCycle,
+			pwm => led
+        );
 
 clk             <= sysclk;
 RGB0(0)			<= '0';
@@ -28,15 +44,10 @@ process(clk)
 begin
     if rising_edge(clk) then
 
-		if state < period then
-			if state < dutyCycle * 1000 then
-				led <= '1';
-			else
-				led <= '0';
-			end if;
-			state <= state + 1;
+		if timer < 312500 then
+			timer <= timer + 1;
 		else
-			state <= 0;
+			timer <= 0;
 			-- fade brightness.
 			if dir = '0' then
 				if dutyCycle < 255 then
