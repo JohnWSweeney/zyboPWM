@@ -11,79 +11,47 @@ end main;
 
 architecture Behavioral of main is
 signal	clk         : std_logic;
-signal  led         : std_logic:= '0';
-signal  state       : integer range 0 to 125000000:= 0;
-signal  period      : integer range 0 to 125000:= 125000;
-signal  pulseWidth  : integer range 0 to 125000:= 125000;
-signal  incr        : integer range 0 to 125000:= 0;
-signal  dir         : std_logic:= '0';
-signal  ledCnt      : integer range 0 to 3:= 0;
+signal	led			: std_logic:= '0';
+signal	state		: integer range 0 to 255000:= 0;
+signal	period		: integer:= 255000;
+signal	dutyCycle	: integer range 0 to 255:= 0;
+signal	dir			: std_logic:= '0';
 
 begin
 
 clk             <= sysclk;
+RGB0(0)			<= '0';
+RGB0(1)			<= '0';
+RGB0(2)			<= led;
 
 process(clk)
 begin
     if rising_edge(clk) then
-        -- LED duty cycle.
-        if pulseWidth < incr  then
-            led <= '1';
-        else
-            led <= '0';
-        end if;
 
-        -- Period control.
-        if pulseWidth < period then
-            pulseWidth <= pulseWidth + 1;
-        else
-            pulseWidth <= 0;
-        end if;
-
-        if state < 125000 then
-            state <= state + 1;
-        else
-            state <= 0;
-            -- Fade in/out control.
-            if dir = '0' then
-                if incr /= 125000 then
-                    incr <= incr + 125;
-                else
-                    dir <= '1';
-                end if;
-            else
-                if incr /= 0 then
-                    incr <= incr - 125;
-                else
-                    dir <= '0';
-                    if ledCnt /= 3 then
-                        ledCnt <= ledCnt + 1;
-                    else
-                        ledCnt <= 0;
-                    end if;
-                end if;
-            end if;
-
-        end if;
-
-        -- Cycle LED driven by PWM.
-        if ledCnt = 0 then
-            RGB0(0)         <= '0';
-            RGB0(1)         <= '0';
-            RGB0(2)         <= led;
-        elsif ledCnt = 1 then
-            RGB0(0)         <= '0';
-            RGB0(1)         <= led;
-            RGB0(2)         <= '0';
-        elsif ledCnt = 2 then
-            RGB0(0)         <= led;
-            RGB0(1)         <= '0';
-            RGB0(2)         <= '0';
-        elsif ledCnt = 3 then
-            RGB0(0)         <= led;
-            RGB0(1)         <= '0';
-            RGB0(2)         <= led; 
-        end if;
+		if state < period then
+			if state < dutyCycle * 1000 then
+				led <= '1';
+			else
+				led <= '0';
+			end if;
+			state <= state + 1;
+		else
+			state <= 0;
+			-- fade brightness.
+			if dir = '0' then
+				if dutyCycle < 255 then
+					dutyCycle <= dutyCycle + 1;
+				else
+					dir <= '1';
+				end if;
+			else
+				if dutyCycle > 0 then
+					dutyCycle <= dutyCycle - 1;
+				else
+					dir <= '0';
+				end if;
+			end if;
+		end if;
 
     end if;
 end process;
