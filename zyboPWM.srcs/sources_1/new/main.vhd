@@ -17,7 +17,7 @@ signal  period      : integer range 0 to 125000:= 125000;
 signal  pulseWidth  : integer range 0 to 125000:= 125000;
 signal  incr        : integer range 0 to 125000:= 0;
 signal  dir         : std_logic:= '0';
-signal  ledCnt      : integer range 0 to 2:= 0;
+signal  ledCnt      : integer range 0 to 3:= 0;
 
 begin
 
@@ -26,13 +26,14 @@ clk             <= sysclk;
 process(clk)
 begin
     if rising_edge(clk) then
-
+        -- LED duty cycle.
         if pulseWidth < incr  then
             led <= '1';
         else
             led <= '0';
         end if;
 
+        -- Period control.
         if pulseWidth < period then
             pulseWidth <= pulseWidth + 1;
         else
@@ -43,6 +44,7 @@ begin
             state <= state + 1;
         else
             state <= 0;
+            -- Fade in/out control.
             if dir = '0' then
                 if incr /= 125000 then
                     incr <= incr + 125;
@@ -54,15 +56,17 @@ begin
                     incr <= incr - 125;
                 else
                     dir <= '0';
-                    if ledCnt /= 2 then
+                    if ledCnt /= 3 then
                         ledCnt <= ledCnt + 1;
                     else
                         ledCnt <= 0;
                     end if;
                 end if;
             end if;
+
         end if;
 
+        -- Cycle LED driven by PWM.
         if ledCnt = 0 then
             RGB0(0)         <= '0';
             RGB0(1)         <= '0';
@@ -74,7 +78,11 @@ begin
         elsif ledCnt = 2 then
             RGB0(0)         <= led;
             RGB0(1)         <= '0';
-            RGB0(2)         <= '0'; 
+            RGB0(2)         <= '0';
+        elsif ledCnt = 3 then
+            RGB0(0)         <= led;
+            RGB0(1)         <= '0';
+            RGB0(2)         <= led; 
         end if;
 
     end if;
